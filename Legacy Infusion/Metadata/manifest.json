@@ -1,0 +1,8 @@
+
+{
+    "name": "LegacyInfusion",
+    "version_number": "1.0.0",
+    "website_url": "",
+    "description": "Infusion no longer has a limit and grants 1 hp per infusion",
+	"dependencies": ["bbepis-BepInExPack-1.3.1"]
+}
