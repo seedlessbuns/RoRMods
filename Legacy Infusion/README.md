@@ -1,6 +1,6 @@
-### Legacy Infusion
+# Legacy Infusion
 
-# By Seedlessbuns
+### By Seedlessbuns
 
 Infusion is back baby! This mod allows you to change or remove the maximum hp from infusion, and grants 1 max hp per infusion on killing enemies, just like in Risk of Rain 1.
 
