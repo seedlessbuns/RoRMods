@@ -19,6 +19,26 @@ namespace legacyInfusion
             get => capConfig.Value;
             protected set => capConfig.Value = value;
         }
+        
+        private static ConfigWrapper<int> stacksPerAdditionalProcConfig { get; set; }
+        
+        public static int stacksPerAdditionalProc
+        {
+            get => stacksPerAdditionalProcConfig.Value;
+            protected set => 
+            {
+                if (value < 1) value = 1;
+                stacksPerAdditionalProcConfig.Value = value;
+            };
+        }
+        
+        private static ConfigWrapper<int> healPerProcConfig { get; set; }
+        
+        public static int healPerProc
+        {
+            get => healPerProcConfig.Value;
+            protected set => healPerProcConfig.Value = value;
+        }
 
 
 
@@ -28,12 +48,16 @@ namespace legacyInfusion
             capConfig = Config.Wrap("Settings", "Health limit", "Sets the health limit per infusion (0 = no limit, minimum is 100)", 0);
             cap = capConfig.Value;
             //Chat.AddMessage("Cap: " + cap);
+            stacksPerAdditionalProcConfig = Config.Wrap("Settings", "Stacks per additional proc", "The amount of stacks required to add additional healing. Do not set this value below 1.", 1);
+            stacksPerAdditionalProc = stackPerAdditionalProcConfig.Value;
+            healPerProcConfig = Config.Wrap("Settings", "Heals per proc", "The amount of healing that should be done per proc.", 1);
+            healPerProc = healPerProcConfig.Value;
 
             On.RoR2.Inventory.AddInfusionBonus += (orig, self, value) =>
             {
-
-                value *= (uint)self.GetItemCount(ItemIndex.Infusion);
-                //Chat.AddMessage("InfusionBOnus: " + self.infusionBonus);
+                procAmount = (uint)(1 + Math.Floor((self.GetItemCount(ItemIndex.Infusion) - 1) / stacksPerAdditionalProc));
+                value *= procAmount * healPerProc;
+                //Chat.AddMessage("InfusionBonus: " + self.infusionBonus);
 
                 orig(self, value);
 
@@ -54,7 +78,8 @@ namespace legacyInfusion
                         if(master)
                         {
                             Inventory inventory = master.inventory;
-                            int infusionCount = inventory.GetItemCount(ItemIndex.Infusion);
+                            int infusionCountReal = inventory.GetItemCount(ItemIndex.Infusion);
+                            int infusionCount = infusionCountReal;
                             if(infusionCount > 0)
                             {
                                 int maxHp = infusionCount * 100;
@@ -82,7 +107,6 @@ namespace legacyInfusion
                                         infusionOrb.maxHpValue = 1;
                                         RoR2.Orbs.OrbManager.instance.AddOrb(infusionOrb);
                                         //Chat.AddMessage("no cap: ");
-
                                     }
                                 }
                             }
