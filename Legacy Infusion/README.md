@@ -10,4 +10,4 @@ V 1.1.0: Created config file to set a hp limit per infusion
 
 V 1.1.1: Removed testing code AGAIN (what is wrong with me)
 
-V 1.2.0: Made the mod true to its name by making health scale by .5 per infusion after your first. (Thanks to anticode for the tip)
+V 1.2.0: Optional nerf: Made the mod true to its name by making health scale by .5 per infusion after your first. (Thanks to anticode for the tip)
