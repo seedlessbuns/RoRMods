@@ -8,17 +8,26 @@ using UnityEngine.Networking;
 namespace legacyInfusion
 {
     [BepInDependency("com.bepis.r2api")]
-    [BepInPlugin("com.seedlessbuns.legacyInfusion", "Legacy Infusion", "1.1.0")]
+    [BepInPlugin("com.seedlessbuns.legacyInfusion", "Legacy Infusion", "1.2.0")]
     public class legacyInfusion : BaseUnityPlugin
     {
 
-        private static ConfigWrapper<int> capConfig { get; set; }    
+        private static ConfigWrapper<int> capConfig { get; set; }
 
+        private static ConfigWrapper<bool> versionConfig { get; set; }
+
+        public static bool version
+        {
+            get => versionConfig.Value;
+            protected set => versionConfig.Value = value;
+        }
         public static int cap
         {
             get => capConfig.Value;
             protected set => capConfig.Value = value;
         }
+
+        public static double realInfusionBonus = 0;
 
 
 
@@ -27,13 +36,34 @@ namespace legacyInfusion
 
             capConfig = Config.Wrap("Settings", "Health limit", "Sets the health limit per infusion (0 = no limit, minimum is 100)", 0);
             cap = capConfig.Value;
+
+            versionConfig = Config.Wrap(
+                "Settings", "Risk of Rain 1 scaling", "True sets scaling to be true to RoR1 (.5 bonus hp per infusion after the first) False sets scaling to 1 hp per infusion", true);
+            version = versionConfig.Value;
             //Chat.AddMessage("Cap: " + cap);
 
             On.RoR2.Inventory.AddInfusionBonus += (orig, self, value) =>
             {
 
-                value *= (uint)self.GetItemCount(ItemIndex.Infusion);
-                //Chat.AddMessage("InfusionBOnus: " + self.infusionBonus);
+                if (version)
+                {
+
+                    realInfusionBonus += 1 + (self.GetItemCount(ItemIndex.Infusion) - 1) / (double)2;
+
+                    value *= (uint)(Math.Floor(realInfusionBonus - self.infusionBonus));
+                    //Chat.AddMessage("real inf: " + realInfusionBonus);
+                    //Chat.AddMessage("value: " + value);
+                    //Chat.AddMessage("new inf bonus: " + (self.infusionBonus + value));
+
+                }
+                else
+                {
+
+
+                    value *= (uint)self.GetItemCount(ItemIndex.Infusion);
+                    //Chat.AddMessage("InfusionBOnus: " + self.infusionBonus);
+
+                }
 
                 orig(self, value);
 
@@ -43,7 +73,7 @@ namespace legacyInfusion
             {
                 DamageInfo damageInfo = damageReport.damageInfo;
                 GameObject gameObject = damageReport.victim.gameObject;
-                
+
 
                 if (damageInfo.attacker)
                 {
@@ -51,11 +81,11 @@ namespace legacyInfusion
                     if (player)
                     {
                         CharacterMaster master = player.master;
-                        if(master)
+                        if (master)
                         {
                             Inventory inventory = master.inventory;
                             int infusionCount = inventory.GetItemCount(ItemIndex.Infusion);
-                            if(infusionCount > 0)
+                            if (infusionCount > 0)
                             {
                                 int maxHp = infusionCount * 100;
                                 if (cap != 0)
